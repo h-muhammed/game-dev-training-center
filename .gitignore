@@ -1,0 +1,13 @@
+# Logs
+logs
+*.log
+
+# dotenv
+.env
+
+# Node
+node_modules/
+npm-debug.log
+
+# Mac system files
+.DS_Store
