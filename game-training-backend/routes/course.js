@@ -6,14 +6,15 @@ const auth = require('../middleware/auth');
 const isAdmin = require('../middleware/isAdmin');
 
 router.post('/',auth, async (req, res) => {
-  const { title, image, description, duration } = req.body;
+   console.log(req.body);
+  const { title, image, description, duration, fee } = req.body;
 
-  if (!title || !image || !description || !duration) {
+  if (!title || !image || !description || !duration || !fee ) {
     return res.status(400).json({ msg: 'Please fill in all fields' });
   }
 
   try {
-    const course = new Course({ title, image, description, duration });
+    const course = new Course({ title, image, description, duration, fee });
     await course.save();
     res.status(201).json({ msg: 'Course created successfully', course });
   } catch (error) {

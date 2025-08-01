@@ -28,11 +28,12 @@ const AdminLogin = () => {
   };
 
   
-  const saveToken = (authToken) => {
-    setToken(authToken);
-    window.adminToken = authToken;
-    console.log('Token saved:', authToken);
-  };
+const saveToken = (authToken) => {
+  localStorage.setItem('adminToken', authToken); // ✅ Save in localStorage
+  setToken(authToken);
+  console.log('Token saved:', authToken);
+};
+
 
   const validateForm = () => {
     const newErrors = {};
@@ -82,7 +83,6 @@ const navigate = useNavigate();
         saveToken(data.token);
         
         
-        alert('Login successful!');
         
         
         setFormData({
@@ -113,11 +113,8 @@ const navigate = useNavigate();
     
      
       
-      <div className="min-vh-100 d-flex align-items-center justify-content-center" 
-           style={{
-             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-           }}>
+      <div className="gradient-bg min-vh-100 d-flex align-items-center justify-content-center" 
+           >
         
         <div className="container">
           <div className="row justify-content-center">
@@ -203,14 +200,9 @@ const navigate = useNavigate();
                     <button
                       type="button"
                       onClick={handleSubmit}
-                      className="btn btn-primary btn-lg w-100 fw-semibold"
+                      className="gradient-bg btn btn-primary btn-lg w-100 fw-semibold"
                       disabled={isLoading}
-                      style={{
-                        borderRadius: '0.5rem',
-                        background: 'linear-gradient(45deg, #667eea, #764ba2)',
-                        border: 'none',
-                        transition: 'all 0.3s ease'
-                      }}
+                      
                     >
                       {isLoading ? (
                         <>

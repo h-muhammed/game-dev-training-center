@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { Container, Row, Col, Card, Button } from 'react-bootstrap';
+
 
 function AdminPanel() {
   // State management
@@ -27,22 +29,54 @@ function AdminPanel() {
 
   // Course form state
   const [courseForm, setCourseForm] = useState({
-    name: '',
+    title: '',
     description: '',
     duration: '',
     fee: '',
-    instructor: ''
+    image: ''
+  });
+
+  // Team form state
+  const [teamForm, setTeamForm] = useState({
+    name: '',
+    position: '',
+    bio: '',
+    image: '',
+    email: '',
+    linkedin: ''
+  });
+
+  // Contact form state
+  const [contactForm, setContactForm] = useState({
+    address: '',
+    phone: '',
+    email: '',
+    mapUrl: '',
+    hours: ''
   });
 
   // Edit states
   const [editingStudent, setEditingStudent] = useState(null);
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [showCourseModal, setShowCourseModal] = useState(false);
+  const [showTeamModal, setShowTeamModal] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
+
+  // Additional state for new features
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [contactDetails, setContactDetails] = useState({
+    address: '',
+    phone: '',
+    email: '',
+    mapUrl: '',
+    hours: ''
+  });
 
   useEffect(() => {
     if (token) {
       fetchStudents();
       fetchCourses();
+     
     } else {
       setError('No authentication token found. Please login first.');
     }
@@ -94,34 +128,8 @@ function AdminPanel() {
     }
   };
 
-  const registerStudent = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`${backendUrl}/admin/students`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(studentForm)
-      });
 
-      if (response.ok) {
-        setSuccess('Student registered successfully!');
-        setStudentForm({ name: '', email: '', phone: '', course: '', status: 'pending' });
-        setShowStudentModal(false);
-        fetchStudents();
-      } else {
-        const errorData = await response.json();
-        setError(errorData.message || 'Failed to register student');
-      }
-    } catch (err) {
-      setError('Network error: Unable to register student');
-      console.error('Register student error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const updateStudent = async () => {
     try {
@@ -151,48 +159,6 @@ function AdminPanel() {
     }
   };
 
-  const deleteStudent = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this student?')) return;
-    
-    try {
-      const response = await fetch(`${backendUrl}/admin/students/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (response.ok) {
-        setSuccess('Student deleted successfully!');
-        fetchStudents();
-      } else {
-        setError('Failed to delete student');
-      }
-    } catch (err) {
-      setError('Network error: Unable to delete student');
-    }
-  };
-
-  const updateStatus = async (id, status) => {
-    try {
-      const response = await fetch(`${backendUrl}/admin/registration/${id}/status`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ status })
-      });
-
-      if (response.ok) {
-        setSuccess(`Student status updated to ${status}`);
-        fetchStudents();
-      } else {
-        setError('Failed to update status');
-      }
-    } catch (err) {
-      setError('Network error: Unable to update status');
-    }
-  };
-
   const addCourse = async () => {
     try {
       setLoading(true);
@@ -207,7 +173,7 @@ function AdminPanel() {
 
       if (response.ok) {
         setSuccess('Course added successfully!');
-        setCourseForm({ name: '', description: '', duration: '', fee: '', instructor: '' });
+        setCourseForm({ title: '', description: '', duration: '', fee: '', image: '' });
         setShowCourseModal(false);
         fetchCourses();
       } else {
@@ -221,15 +187,8 @@ function AdminPanel() {
     }
   };
 
-  // Form handlers
-  const handleStudentSubmit = (e) => {
-    e.preventDefault();
-    if (editingStudent) {
-      updateStudent();
-    } else {
-      registerStudent();
-    }
-  };
+
+
 
   const handleEditStudent = (student) => {
     setEditingStudent(student);
@@ -248,6 +207,9 @@ function AdminPanel() {
     addCourse();
   };
 
+ 
+
+
   // Clear messages after 3 seconds
   useEffect(() => {
     if (success) {
@@ -264,457 +226,343 @@ function AdminPanel() {
   }, [error]);
 
   return (
-   
+    <>
+      
+      
+      {/* Hero Section */}
+      <div className="gradient-bg text-white text-center py-5">
+        <Container>
+          <Row className="justify-content-center">
+            <Col lg={8}>
+              <h1 className="display-4 fw-bold mb-4">
+                <i className="bi bi-gear-fill me-3"></i>
+                Admin Dashboard
+              </h1>
+              <p className="lead">
+                Manage your Game Development Training Center with comprehensive admin tools
+              </p>
+              <div className="d-flex justify-content-center align-items-center mt-4">
+                <span className="badge bg-success me-3 px-3 py-2">
+                  <i className="bi bi-check-circle me-2"></i>
+                  Authenticated
+                </span>
+                <button 
+                  className="btn btn-outline-light btn-sm"
+                  onClick={() => {
+                    localStorage.removeItem('adminToken');
+                    window.location.reload();
+                  }}
+                >
+                  <i className="bi bi-box-arrow-right me-2"></i>
+                  Logout
+                </button>
+              </div>
+            </Col>
+          </Row>
+        </Container>
+      </div>
 
-      <div className="container-fluid mt-4">
-        {/* Header */}
-        <div className="row mb-4">
-          <div className="col-12">
-            <div className="d-flex justify-content-between align-items-center">
-              <h2 className="mb-0">
-                <i className="bi bi-gear-fill me-2 text-primary"></i>
-                Admin Panel
-              </h2>
-              <div className="badge bg-success">
-                <i className="bi bi-check-circle me-1"></i>
-                Authenticated
+      <div className="section-padding">
+        <Container>
+          {/* Alert Messages */}
+          {error && (
+            <div className="alert alert-danger alert-dismissible fade show" role="alert">
+              <i className="bi bi-exclamation-triangle me-2"></i>
+              {error}
+              <button type="button" className="btn-close" onClick={() => setError('')}></button>
+            </div>
+          )}
+
+          {success && (
+            <div className="alert alert-success alert-dismissible fade show" role="alert">
+              <i className="bi bi-check-circle me-2"></i>
+              {success}
+              <button type="button" className="btn-close" onClick={() => setSuccess('')}></button>
+            </div>
+          )}
+
+          {/* Navigation Tabs */}
+          <Row className="mb-4">
+            <Col lg={12}>
+              <Card className="border-0 shadow">
+                <Card.Body>
+                  <ul className="nav nav-pills nav-fill">
+                    <li className="nav-item">
+                      <button 
+                        className={`nav-link ${activeTab === 'students' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('students')}
+                      >
+                        <i className="bi bi-people me-2"></i>
+                        Student Management
+                      </button>
+                    </li>
+                    <li className="nav-item">
+                      <button 
+                        className={`nav-link ${activeTab === 'courses' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('courses')}
+                      >
+                        <i className="bi bi-book me-2"></i>
+                        Course Management
+                      </button>
+                    </li>
+                    
+                   
+                  </ul>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+
+          {/* Students Tab */}
+          {activeTab === 'students' && (
+            <Row>
+              <Col lg={12}>
+                <Card className="border-0 shadow">
+                  <Card.Header className="bg-primary text-white">
+                    <h5 className="mb-0">
+                      <i className="bi bi-people me-2"></i>
+                      Student Registrations
+                    </h5>
+                  </Card.Header>
+                  <Card.Body>
+                    {loading ? (
+                      <div className="text-center py-4">
+                        <div className="spinner-border text-primary" role="status">
+                          <span className="visually-hidden">Loading...</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="table-responsive">
+                        <table className="table table-striped table-hover">
+                          <thead className="table-dark">
+                            <tr>
+                              <th>Name</th>
+                              <th>Email</th>
+                              <th>Phone</th>
+                              <th>Course</th>
+                              <th>Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {students.length === 0 ? (
+                              <tr>
+                                <td colSpan={5} className="text-center py-4 text-muted">
+                                  <i className="bi bi-inbox me-2"></i>
+                                  No students found
+                                </td>
+                              </tr>
+                            ) : (
+                              students.map(student => (
+                                <tr key={student._id}>
+                                  <td>
+                                    <div className="d-flex align-items-center">
+                                      <div className="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" 
+                                           style={{ width: '32px', height: '32px' }}>
+                                        <i className="bi bi-person text-white"></i>
+                                      </div>
+                                      {student.name}
+                                    </div>
+                                  </td>
+                                  <td>{student.email}</td>
+                                  <td>{student.phone || 'N/A'}</td>
+                                  <td>
+                                    <span className="badge bg-info">
+                                      {student.course?.title || 'N/A'}
+                                    </span>
+                                  </td>
+                                  <td>
+                                    <span className={`badge ${
+                                      student.status === 'approved' ? 'bg-success' :
+                                      student.status === 'rejected' ? 'bg-danger' :
+                                      'bg-warning'
+                                    }`}>
+                                      {student.status}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </Card.Body>
+                </Card>
+              </Col>
+            </Row>
+          )}
+
+          {/* Courses Tab */}
+          {activeTab === 'courses' && (
+            <Row>
+              <Col lg={12}>
+                <Card className="border-0 shadow">
+                  <Card.Header className="bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 className="mb-0">
+                      <i className="bi bi-book me-2"></i>
+                      Course Management
+                    </h5>
+                    <Button 
+                      variant="light"
+                      onClick={() => setShowCourseModal(true)}
+                    >
+                      <i className="bi bi-plus-circle me-2"></i>
+                      Add New Course
+                    </Button>
+                  </Card.Header>
+                  <Card.Body>
+                    <Row>
+                      {courses.length === 0 ? (
+                        <Col lg={12} className="text-center py-4 text-muted">
+                          <i className="bi bi-book me-2"></i>
+                          No courses found
+                        </Col>
+                      ) : (
+                        courses.map(course => (
+                          <Col md={6} lg={4} key={course._id} className="mb-4">
+                            <Card className="h-100 course-card">
+                              {course.image && (
+                                <Card.Img
+                                  variant="top"
+                                  src={course.image}
+                                  alt={course.title}
+                                  style={{ height: '200px', objectFit: 'cover' }}
+                                />
+                              )}
+                              <Card.Body>
+                                <Card.Title className="h5">{course.title}</Card.Title>
+                                <Card.Text className="text-muted">{course.description}</Card.Text>
+                                <Row>
+                                  <Col xs={6}>
+                                    <small className="text-muted">Duration</small>
+                                    <div>{course.duration}</div>
+                                  </Col>
+                                  <Col xs={6}>
+                                    <small className="text-muted">Fee</small>
+                                    <div className="fw-bold">Rs. {course.fee}</div>
+                                  </Col>
+                                </Row>
+                              </Card.Body>
+                            </Card>
+                          </Col>
+                        ))
+                      )}
+                    </Row>
+                  </Card.Body>
+                </Card>
+              </Col>
+            </Row>
+          )}
+
+
+         
+         
+        </Container>
+      </div>
+
+      {/* Course Modal */}
+      {showCourseModal && (
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Add New Course</h5>
+                <button 
+                  type="button" 
+                  className="btn-close"
+                  onClick={() => setShowCourseModal(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <div className="mb-3">
+                  <label className="form-label">Course Name</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={courseForm.title}
+                    onChange={(e) => setCourseForm({...courseForm, title: e.target.value})}
+                    required
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Description</label>
+                  <textarea
+                    className="form-control"
+                    rows={3}
+                    value={courseForm.description}
+                    onChange={(e) => setCourseForm({...courseForm, description: e.target.value})}
+                    required
+                  ></textarea>
+                </div>
+                <Row>
+                  <Col xs={6}>
+                    <div className="mb-3">
+                      <label className="form-label">Duration</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="e.g., 6 months"
+                        value={courseForm.duration}
+                        onChange={(e) => setCourseForm({...courseForm, duration: e.target.value})}
+                        required
+                      />
+                    </div>
+                  </Col>
+                  <Col xs={6}>
+                    <div className="mb-3">
+                      <label className="form-label">Fee</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="0"
+                        value={courseForm.fee}
+                        onChange={(e) => setCourseForm({...courseForm, fee: e.target.value})}
+                        required
+                      />
+                    </div>
+                  </Col>
+                </Row>
+                <div className="mb-3">
+                  <label className="form-label">Image URL</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={courseForm.image}
+                    onChange={(e) => setCourseForm({...courseForm, image: e.target.value})}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button 
+                  type="button" 
+                  className="btn btn-secondary"
+                  onClick={() => setShowCourseModal(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn-primary"
+                  onClick={handleCourseSubmit}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2"></span>
+                      Adding...
+                    </>
+                  ) : (
+                    'Add Course'
+                  )}
+                </button>
               </div>
             </div>
           </div>
         </div>
+      )}
 
-        {/* Alert Messages */}
-        {error && (
-          <div className="alert alert-danger alert-dismissible fade show" role="alert">
-            <i className="bi bi-exclamation-triangle me-2"></i>
-            {error}
-            <button type="button" className="btn-close" onClick={() => setError('')}></button>
-          </div>
-        )}
-
-        {success && (
-          <div className="alert alert-success alert-dismissible fade show" role="alert">
-            <i className="bi bi-check-circle me-2"></i>
-            {success}
-            <button type="button" className="btn-close" onClick={() => setSuccess('')}></button>
-          </div>
-        )}
-
-        {/* Navigation Tabs */}
-        <ul className="nav nav-tabs mb-4">
-          <li className="nav-item">
-            <button 
-              className={`nav-link ${activeTab === 'students' ? 'active' : ''}`}
-              onClick={() => setActiveTab('students')}
-            >
-              <i className="bi bi-people me-2"></i>
-              Student Management
-            </button>
-          </li>
-          <li className="nav-item">
-            <button 
-              className={`nav-link ${activeTab === 'courses' ? 'active' : ''}`}
-              onClick={() => setActiveTab('courses')}
-            >
-              <i className="bi bi-book me-2"></i>
-              Course Management
-            </button>
-          </li>
-        </ul>
-
-        {/* Students Tab */}
-        {activeTab === 'students' && (
-          <div className="tab-pane fade show active">
-            <div className="row mb-3">
-              <div className="col-12">
-                <div className="d-flex justify-content-between align-items-center">
-                  <h4>Student Registrations</h4>
-                  <button 
-                    className="btn btn-primary"
-                    onClick={() => {
-                      setEditingStudent(null);
-                      setStudentForm({ name: '', email: '', phone: '', course: '', status: 'pending' });
-                      setShowStudentModal(true);
-                    }}
-                  >
-                    <i className="bi bi-plus-circle me-2"></i>
-                    Register New Student
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {loading ? (
-              <div className="text-center py-4">
-                <div className="spinner-border text-primary" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </div>
-              </div>
-            ) : (
-              <div className="table-responsive">
-                <table className="table table-striped table-hover">
-                  <thead className="table-dark">
-                    <tr>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Phone</th>
-                      <th>Course</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {students.length === 0 ? (
-                      <tr>
-                        <td colSpan="6" className="text-center py-4 text-muted">
-                          <i className="bi bi-inbox me-2"></i>
-                          No students found
-                        </td>
-                      </tr>
-                    ) : (
-                      students.map(student => (
-                        <tr key={student._id}>
-                          <td>
-                            <div className="d-flex align-items-center">
-                              <div className="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" 
-                                   style={{ width: '32px', height: '32px' }}>
-                                <i className="bi bi-person text-white"></i>
-                              </div>
-                              {student.name}
-                            </div>
-                          </td>
-                          <td>{student.email}</td>
-                          <td>{student.phone || 'N/A'}</td>
-                          <td>
-                            <span className="badge bg-info">
-                              {student.course?.name || student.course || 'N/A'}
-                            </span>
-                          </td>
-                          <td>
-                            <span className={`badge ${
-                              student.status === 'approved' ? 'bg-success' :
-                              student.status === 'rejected' ? 'bg-danger' :
-                              'bg-warning'
-                            }`}>
-                              {student.status}
-                            </span>
-                          </td>
-                          <td>
-                            <div className="btn-group" role="group">
-                              {student.status === 'pending' && (
-                                <>
-                                  <button 
-                                    className="btn btn-success btn-sm"
-                                    onClick={() => updateStatus(student._id, 'approved')}
-                                    title="Approve"
-                                  >
-                                    <i className="bi bi-check"></i>
-                                  </button>
-                                  <button 
-                                    className="btn btn-danger btn-sm"
-                                    onClick={() => updateStatus(student._id, 'rejected')}
-                                    title="Reject"
-                                  >
-                                    <i className="bi bi-x"></i>
-                                  </button>
-                                </>
-                              )}
-                              <button 
-                                className="btn btn-outline-primary btn-sm"
-                                onClick={() => handleEditStudent(student)}
-                                title="Edit"
-                              >
-                                <i className="bi bi-pencil"></i>
-                              </button>
-                              <button 
-                                className="btn btn-outline-danger btn-sm"
-                                onClick={() => deleteStudent(student._id)}
-                                title="Delete"
-                              >
-                                <i className="bi bi-trash"></i>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Courses Tab */}
-        {activeTab === 'courses' && (
-          <div className="tab-pane fade show active">
-            <div className="row mb-3">
-              <div className="col-12">
-                <div className="d-flex justify-content-between align-items-center">
-                  <h4>Course Management</h4>
-                  <button 
-                    className="btn btn-primary"
-                    onClick={() => setShowCourseModal(true)}
-                  >
-                    <i className="bi bi-plus-circle me-2"></i>
-                    Add New Course
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="row">
-              {courses.length === 0 ? (
-                <div className="col-12 text-center py-4 text-muted">
-                  <i className="bi bi-book me-2"></i>
-                  No courses found
-                </div>
-              ) : (
-                courses.map(course => (
-                  <div key={course._id} className="col-md-6 col-lg-4 mb-4">
-                    <div className="card h-100">
-                      <div className="card-header bg-primary text-white">
-                        <h5 className="card-title mb-0">
-                          <i className="bi bi-book me-2"></i>
-                          {course.name}
-                        </h5>
-                      </div>
-                      <div className="card-body">
-                        <p className="card-text">{course.description}</p>
-                        <div className="row">
-                          <div className="col-6">
-                            <small className="text-muted">Duration</small>
-                            <div>{course.duration}</div>
-                          </div>
-                          <div className="col-6">
-                            <small className="text-muted">Fee</small>
-                            <div className="fw-bold">${course.fee}</div>
-                          </div>
-                        </div>
-                        {course.instructor && (
-                          <div className="mt-2">
-                            <small className="text-muted">Instructor</small>
-                            <div>{course.instructor}</div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Student Modal */}
-        {showStudentModal && (
-          <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-            <div className="modal-dialog">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">
-                    {editingStudent ? 'Edit Student' : 'Register New Student'}
-                  </h5>
-                  <button 
-                    type="button" 
-                    className="btn-close"
-                    onClick={() => setShowStudentModal(false)}
-                  ></button>
-                </div>
-                <div className="modal-body">
-                  <div onSubmit={handleStudentSubmit}>
-                    <div className="mb-3">
-                      <label className="form-label">Name</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={studentForm.name}
-                        onChange={(e) => setStudentForm({...studentForm, name: e.target.value})}
-                        required
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label">Email</label>
-                      <input
-                        type="email"
-                        className="form-control"
-                        value={studentForm.email}
-                        onChange={(e) => setStudentForm({...studentForm, email: e.target.value})}
-                        required
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label">Phone</label>
-                      <input
-                        type="tel"
-                        className="form-control"
-                        value={studentForm.phone}
-                        onChange={(e) => setStudentForm({...studentForm, phone: e.target.value})}
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label">Course</label>
-                      <select
-                        className="form-select"
-                        value={studentForm.course}
-                        onChange={(e) => setStudentForm({...studentForm, course: e.target.value})}
-                        required
-                      >
-                        <option value="">Select a course</option>
-                        {courses.map(course => (
-                          <option key={course._id} value={course._id}>
-                            {course.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label">Status</label>
-                      <select
-                        className="form-select"
-                        value={studentForm.status}
-                        onChange={(e) => setStudentForm({...studentForm, status: e.target.value})}
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button 
-                    type="button" 
-                    className="btn btn-secondary"
-                    onClick={() => setShowStudentModal(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="button" 
-                    className="btn btn-primary"
-                    onClick={handleStudentSubmit}
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <>
-                        <span className="spinner-border spinner-border-sm me-2"></span>
-                        {editingStudent ? 'Updating...' : 'Registering...'}
-                      </>
-                    ) : (
-                      editingStudent ? 'Update Student' : 'Register Student'
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Course Modal */}
-        {showCourseModal && (
-          <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-            <div className="modal-dialog">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">Add New Course</h5>
-                  <button 
-                    type="button" 
-                    className="btn-close"
-                    onClick={() => setShowCourseModal(false)}
-                  ></button>
-                </div>
-                <div className="modal-body">
-                  <div onSubmit={handleCourseSubmit}>
-                    <div className="mb-3">
-                      <label className="form-label">Course Name</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={courseForm.name}
-                        onChange={(e) => setCourseForm({...courseForm, name: e.target.value})}
-                        required
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label">Description</label>
-                      <textarea
-                        className="form-control"
-                        rows="3"
-                        value={courseForm.description}
-                        onChange={(e) => setCourseForm({...courseForm, description: e.target.value})}
-                        required
-                      ></textarea>
-                    </div>
-                    <div className="row">
-                      <div className="col-6">
-                        <div className="mb-3">
-                          <label className="form-label">Duration</label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            placeholder="e.g., 6 months"
-                            value={courseForm.duration}
-                            onChange={(e) => setCourseForm({...courseForm, duration: e.target.value})}
-                            required
-                          />
-                        </div>
-                      </div>
-                      <div className="col-6">
-                        <div className="mb-3">
-                          <label className="form-label">Fee</label>
-                          <input
-                            type="number"
-                            className="form-control"
-                            placeholder="0"
-                            value={courseForm.fee}
-                            onChange={(e) => setCourseForm({...courseForm, fee: e.target.value})}
-                            required
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label">Instructor</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={courseForm.instructor}
-                        onChange={(e) => setCourseForm({...courseForm, instructor: e.target.value})}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button 
-                    type="button" 
-                    className="btn btn-secondary"
-                    onClick={() => setShowCourseModal(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="button" 
-                    className="btn btn-primary"
-                    onClick={handleCourseSubmit}
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <>
-                        <span className="spinner-border spinner-border-sm me-2"></span>
-                        Adding...
-                      </>
-                    ) : (
-                      'Add Course'
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
+    </>
   );
 }
 

@@ -20,11 +20,18 @@ router.post('/login', async (req, res) => {
   res.json({ token });
 });
 
-router.get('/registrations',auth, async (req, res) => {
+router.get('/registrations', auth, async (req, res) => {
   const Registration = require('../models/Registration');
-  const data = await Registration.find();
-  res.json(data);
+
+  try {
+    const data = await Registration.find().populate('course'); // 👈 this joins course data
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Server error' });
+  }
 });
+
 
 //register new admin
 router.post('/register',auth,isAdmin, async (req, res) => {
