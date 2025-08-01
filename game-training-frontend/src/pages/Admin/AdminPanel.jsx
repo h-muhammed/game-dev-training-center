@@ -129,6 +129,29 @@ function AdminPanel() {
   };
 
 
+const changeStudentStatus = async (id, newStatus) => {
+  try {
+    const response = await fetch(`${backendUrl}/admin/registration/${id}/status`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ status: newStatus })
+    });
+
+    if (response.ok) {
+      setSuccess('Status updated successfully');
+      fetchStudents(); // Refresh the table
+    } else {
+      const data = await response.json();
+      setError(data.message || 'Failed to update status');
+    }
+  } catch (error) {
+    setError('Network error while updating status');
+    console.error(error);
+  }
+};
 
 
   const updateStudent = async () => {
@@ -371,13 +394,27 @@ function AdminPanel() {
                                     </span>
                                   </td>
                                   <td>
-                                    <span className={`badge ${
-                                      student.status === 'approved' ? 'bg-success' :
-                                      student.status === 'rejected' ? 'bg-danger' :
-                                      'bg-warning'
-                                    }`}>
-                                      {student.status}
-                                    </span>
+                                   <div className="d-flex align-items-center gap-2">
+ <span className={`badge ${
+  student.status === 'active' ? 'bg-success' :
+  student.status === 'deactive' ? 'bg-danger' :
+  'bg-warning'
+}`}>
+  {student.status}
+</span>
+
+  <div className="dropdown">
+    <button className="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+      Change
+    </button>
+    <ul className="dropdown-menu">
+      <li><button className="dropdown-item" onClick={() => changeStudentStatus(student._id, 'active')}>Active</button></li>
+      <li><button className="dropdown-item" onClick={() => changeStudentStatus(student._id, 'deactive')}>deactive</button></li>
+      
+    </ul>
+  </div>
+</div>
+
                                   </td>
                                 </tr>
                               ))
