@@ -11,7 +11,7 @@ const Contact = () => {
   const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8080/api';
   const [errors, setErrors] = useState({});
   const [showSuccess, setShowSuccess] = useState(false);
-  const[contactInfo, setContactInfo] = useState({});
+  const [contactInfo, setContactInfo] = useState({});
 
   useEffect(() => {
     const fetchContactInfo = async () => {
@@ -19,7 +19,7 @@ const Contact = () => {
         const response = await fetch(`${backendUrl}/contactinfo`);
         if (response.ok) {
           const data = await response.json();
-         setContactInfo(data[0]);
+          setContactInfo(data[0]);
 
         } else {
           console.error('Failed to fetch contact info');
@@ -35,20 +35,26 @@ const Contact = () => {
   const validateForm = () => {
     const newErrors = {};
 
+    // Name: required
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
     }
 
+    // Email: required + basic format check
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email format is invalid';
     }
 
-    if (!formData.subject.trim()) {
-      newErrors.subject = 'Subject is required';
+    // Phone: required + digits-only + length check
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    } else if (!/^[0-9]{10,15}$/.test(formData.phone)) {
+      newErrors.phone = 'Phone number must be 10 to 15 digits';
     }
 
+    // Message: required
     if (!formData.message.trim()) {
       newErrors.message = 'Message is required';
     }
@@ -56,48 +62,49 @@ const Contact = () => {
     return newErrors;
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  const newErrors = validateForm();
 
-  if (Object.keys(newErrors).length > 0) {
-    setErrors(newErrors);
-    return;
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const newErrors = validateForm();
 
-  try {
-    const res = await fetch(`${backendUrl}/contactmessage`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        message: formData.message,
-      }),
-    });
-
-    if (res.ok) {
-      setShowSuccess(true);
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        message: ''
-       
-      });
-      setTimeout(() => setShowSuccess(false), 5000);
-    } else {
-      const err = await res.json();
-      alert('Failed to send message: ' + err.message || 'Unknown error');
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
     }
-  } catch (error) {
-    console.error('Error submitting message:', error);
-    alert('Error sending message');
-  }
-};
+
+    try {
+      const res = await fetch(`${backendUrl}/contactmessage`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          message: formData.message,
+        }),
+      });
+
+      if (res.ok) {
+        setShowSuccess(true);
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          message: ''
+
+        });
+        setTimeout(() => setShowSuccess(false), 5000);
+      } else {
+        const err = await res.json();
+        alert('Failed to send message: ' + err.message || 'Unknown error');
+      }
+    } catch (error) {
+      console.error('Error submitting message:', error);
+      alert('Error sending message');
+    }
+  };
 
 
   const handleChange = (e) => {
@@ -106,7 +113,7 @@ const handleSubmit = async (e) => {
       ...prev,
       [name]: value
     }));
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
@@ -119,7 +126,7 @@ const handleSubmit = async (e) => {
   return (
     <>
       <Navigation />
-      
+
       {/* Header Section */}
       <div className="gradient-bg text-white text-center py-5">
         <Container>
@@ -143,15 +150,15 @@ const handleSubmit = async (e) => {
               <Card className="shadow border-0 h-100">
                 <Card.Body>
                   <h4 className="fw-bold mb-4">Get In Touch</h4>
-                  
+
                   <div className="mb-4">
                     <div className="d-flex align-items-center mb-2">
                       <i className="bi bi-geo-alt-fill text-primary me-3 fs-5"></i>
                       <strong>Address</strong>
                     </div>
-                   <p className="text-muted ms-4">
-  {contactInfo?.address || 'Loading...'}
-</p>
+                    <p className="text-muted ms-4">
+                      {contactInfo?.address || 'Loading...'}
+                    </p>
 
                   </div>
 
@@ -160,7 +167,7 @@ const handleSubmit = async (e) => {
                       <i className="bi bi-telephone-fill text-primary me-3 fs-5"></i>
                       <strong>Phone</strong>
                     </div>
-                   <p className="text-muted ms-4">{contactInfo?.phone || '...'}</p>
+                    <p className="text-muted ms-4">{contactInfo?.phone || '...'}</p>
                   </div>
 
                   <div className="mb-4">
@@ -198,7 +205,7 @@ const handleSubmit = async (e) => {
               <Card className="shadow border-0">
                 <Card.Body>
                   <h4 className="fw-bold mb-4">Send us a Message</h4>
-                  
+
                   <Form onSubmit={handleSubmit}>
                     <Row>
                       <Col md={6}>
@@ -217,7 +224,7 @@ const handleSubmit = async (e) => {
                           </Form.Control.Feedback>
                         </Form.Group>
                       </Col>
-                      
+
                       <Col md={6}>
                         <Form.Group className="mb-3">
                           <Form.Label>Email Address *</Form.Label>
@@ -235,25 +242,25 @@ const handleSubmit = async (e) => {
                         </Form.Group>
                       </Col>
                       <Col md={6}>
-  <Form.Group className="mb-3">
-    <Form.Label>Phone Number *</Form.Label>
-    <Form.Control
-      type="tel"
-      name="phone"
-      value={formData.phone}
-      onChange={handleChange}
-      isInvalid={!!errors.phone}
-      placeholder="Enter your phone number"
-    />
-    <Form.Control.Feedback type="invalid">
-      {errors.phone}
-    </Form.Control.Feedback>
-  </Form.Group>
-</Col>
+                        <Form.Group className="mb-3">
+                          <Form.Label>Phone Number *</Form.Label>
+                          <Form.Control
+                            type="tel"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleChange}
+                            isInvalid={!!errors.phone}
+                            placeholder="Enter your phone number"
+                          />
+                          <Form.Control.Feedback type="invalid">
+                            {errors.phone}
+                          </Form.Control.Feedback>
+                        </Form.Group>
+                      </Col>
 
                     </Row>
 
-                    
+
 
                     <Form.Group className="mb-4">
                       <Form.Label>Message *</Form.Label>
