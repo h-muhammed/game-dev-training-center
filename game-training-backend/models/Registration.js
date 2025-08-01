@@ -6,6 +6,7 @@ const RegistrationSchema = new mongoose.Schema({
   phone: { type: String, required: true },
   course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true },
   message: { type: String, trim: true },
+  status: { type: String, enum: ['active', 'deactive'], default: 'deactive' },
   createdAt: { type: Date, default: Date.now }
 });
 

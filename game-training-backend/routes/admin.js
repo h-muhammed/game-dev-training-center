@@ -3,7 +3,7 @@ const router = express.Router();
 const Admin = require('../models/Admin');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
+const Registration = require('../models/Registration');
 const auth = require('../middleware/auth');
 const isAdmin = require('../middleware/isAdmin');
 
@@ -31,7 +31,34 @@ router.get('/registrations', auth, async (req, res) => {
     res.status(500).json({ msg: 'Server error' });
   }
 });
+//update register student status
+router.put('/registration/:id/status',auth, async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
 
+  // Optional: Validate allowed status values
+  const allowedStatuses = ['active', 'deactive'];
+  if (!allowedStatuses.includes(status)) {
+    return res.status(400).json({ error: 'Invalid status value' });
+  }
+
+  try {
+    const updatedRegistration = await Registration.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+
+    if (!updatedRegistration) {
+      return res.status(404).json({ error: 'Registration not found' });
+    }
+
+    res.json({ message: 'Status updated successfully', data: updatedRegistration });
+  } catch (error) {
+    console.error('Error updating status:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 //register new admin
 router.post('/register',auth,isAdmin, async (req, res) => {
