@@ -3,7 +3,7 @@ const router = express.Router();
 const ContactInfo = require('../models/ContactInfo');
 
 const auth = require('../middleware/auth');
-const isAdmin = require('../middleware/isAdmin');
+
 
 //insert contact info
 router.post('/', async (req, res) => {
@@ -33,7 +33,7 @@ router.get('/', async (req, res) => {
 });
 
 //update contact info by ID
-router.put('/:id',auth,isAdmin, async (req, res) => {
+router.put('/:id',auth, async (req, res) => {
   const { id } = req.params;
   const { name, email, phone, message } = req.body;
 

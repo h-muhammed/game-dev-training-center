@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 const auth = require('../middleware/auth');
-const isAdmin = require('../middleware/isAdmin');
+
 
 router.post('/',auth, async (req, res) => {
    console.log(req.body);
