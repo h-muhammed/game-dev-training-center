@@ -63,9 +63,10 @@ const Courses = () => {
               <Badge bg="info">{course.duration}</Badge>
             </div>
             <Card.Title className="h5">{course.title}</Card.Title>
-            <Card.Text className="text-muted flex-grow-1" style={{ maxHeight: '120px', overflow: 'hidden' }}>
-              {course.description.length > 150 ? course.description.slice(0, 150) + '...' : course.description}
-            </Card.Text>
+            <Card.Text className="text-muted flex-grow-1">
+  {course.description}
+</Card.Text>
+
             <div className="d-flex justify-content-between align-items-center mt-auto">
               <span className="h5 mb-0 text-primary">LKR {course.fee}</span>
               <Button variant="primary" href="/registration">
