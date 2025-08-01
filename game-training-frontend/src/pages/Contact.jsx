@@ -85,8 +85,8 @@ const handleSubmit = async (e) => {
         name: '',
         email: '',
         phone: '',
-        message: '',
-        subject: '', // optional
+        message: ''
+       
       });
       setTimeout(() => setShowSuccess(false), 5000);
     } else {
@@ -234,22 +234,26 @@ const handleSubmit = async (e) => {
                           </Form.Control.Feedback>
                         </Form.Group>
                       </Col>
+                      <Col md={6}>
+  <Form.Group className="mb-3">
+    <Form.Label>Phone Number *</Form.Label>
+    <Form.Control
+      type="tel"
+      name="phone"
+      value={formData.phone}
+      onChange={handleChange}
+      isInvalid={!!errors.phone}
+      placeholder="Enter your phone number"
+    />
+    <Form.Control.Feedback type="invalid">
+      {errors.phone}
+    </Form.Control.Feedback>
+  </Form.Group>
+</Col>
+
                     </Row>
 
-                    <Form.Group className="mb-3">
-                      <Form.Label>Subject *</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="subject"
-                        value={formData.subject}
-                        onChange={handleChange}
-                        isInvalid={!!errors.subject}
-                        placeholder="What is this regarding?"
-                      />
-                      <Form.Control.Feedback type="invalid">
-                        {errors.subject}
-                      </Form.Control.Feedback>
-                    </Form.Group>
+                    
 
                     <Form.Group className="mb-4">
                       <Form.Label>Message *</Form.Label>
