@@ -61,7 +61,7 @@ router.put('/registration/:id/status',auth, async (req, res) => {
 });
 
 //register new admin
-router.post('/register',auth,isAdmin, async (req, res) => {
+router.post('/register',auth, async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {

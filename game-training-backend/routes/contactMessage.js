@@ -8,7 +8,14 @@ router.post('/', async (req, res) => {
   if (!name || !email || !phone || !message) {
     return res.status(400).json({ msg: 'Please fill in all fields' });
   }
-
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^[0-9]{10,15}$/; 
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ msg: 'Invalid email format' });
+  }
+  if (!phoneRegex.test(phone)) {
+    return res.status(400).json({ msg: 'Phone number must be numeric and 10–15 digits long' });
+  }
   try {
     const contactMessage = new ContactInfo(req.body);
     await contactMessage.save();
